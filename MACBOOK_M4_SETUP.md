@@ -176,13 +176,23 @@ camera before relying on its geometry:
 
 The `cols` and `rows` are the checkerboard's inner-corner counts; capture at
 least 10 views at varied positions. The webcam launcher requires the Pangolin
-and `glutils` viewer modules described above. Semantic segmentation is a
-separate optional feature; enable it only when its model dependencies and
-weights are installed:
+and `glutils` viewer modules described above.
+
+Semantic mapping is opt-in and off by default. Enable it with the launcher
+switch:
 
 ```bash
-SEMANTIC_ENABLED=true ./run_macbook_webcam_slam.sh
+./run_macbook_webcam_slam.sh --semantics
 ```
+
+The semantic profile uses torchvision DeepLabV3 MobileNetV3 with VOC class
+labels. Per-pixel class predictions are attached to keypoints, fused into map
+points, and included in the semantic voxel map. This is class-label semantic
+segmentation: it does not produce the open-vocabulary object detections or
+distinct instance masks shown in some upstream examples. To disable semantics
+explicitly, use `--no-semantics`; the equivalent environment toggle remains
+available as `SEMANTIC_ENABLED=true|false`. Semantic inference adds computation
+and can reduce the live frame rate.
 
 ## Troubleshooting
 

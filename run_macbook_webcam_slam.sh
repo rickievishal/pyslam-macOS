@@ -4,6 +4,53 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PYTHON="$ROOT_DIR/.venv/bin/python"
 
+usage() {
+  cat <<'EOF'
+Usage: ./run_macbook_webcam_slam.sh [--semantics | --no-semantics]
+
+  --semantics      Enable semantic segmentation and semantic map fusion.
+  --no-semantics   Disable semantic segmentation (the default).
+
+SEMANTIC_ENABLED=true|false may also be used; an explicit command-line option
+overrides the environment variable.
+EOF
+}
+
+SEMANTIC_ENABLED="${SEMANTIC_ENABLED:-false}"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --semantics)
+      SEMANTIC_ENABLED=true
+      ;;
+    --no-semantics)
+      SEMANTIC_ENABLED=false
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+  shift
+done
+
+case "$SEMANTIC_ENABLED" in
+  true|TRUE|1|yes|YES|on|ON)
+    SEMANTIC_ENABLED=true
+    ;;
+  false|FALSE|0|no|NO|off|OFF)
+    SEMANTIC_ENABLED=false
+    ;;
+  *)
+    echo "Invalid SEMANTIC_ENABLED value: $SEMANTIC_ENABLED (use true or false)." >&2
+    exit 2
+    ;;
+esac
+
 if [[ ! -x "$PYTHON" ]]; then
   echo "Missing .venv. See MACBOOK_M4_SETUP.md for the environment setup command." >&2
   exit 1
@@ -20,7 +67,6 @@ CAMERA_ID="${CAMERA_ID:-0}"
 WIDTH="${WIDTH:-640}"
 HEIGHT="${HEIGHT:-480}"
 FPS="${FPS:-30}"
-SEMANTIC_ENABLED="${SEMANTIC_ENABLED:-false}"
 
 if [[ "$SEMANTIC_ENABLED" == "true" ]]; then
   MPS_AVAILABLE="$($PYTHON -c 'import torch; print(str(torch.backends.mps.is_available()).lower())')"
