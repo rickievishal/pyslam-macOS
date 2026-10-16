@@ -27,7 +27,7 @@ GLOBAL_PARAMETERS:
   kDoVolumetricIntegration: True
   kUseDepthEstimatorInFrontEnd: True
   kDoSparseSemanticMappingAndSegmentation: True
-  kSemanticSegmentationType: DEEPLABV3
+  kSemanticSegmentationType: YOLO
   kSemanticMappingOnSeparateThread: True
   kSemanticMappingMoveSemanticSegmentationToSeparateProcess: False
   kUseLoopClosing: False

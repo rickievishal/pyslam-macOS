@@ -33,6 +33,7 @@ from .semantic_segmentation_types import SemanticSegmentationType
 from .semantic_instance_utils import ensure_unique_instance_ids
 
 from pyslam.utilities.logging import Printer
+from pyslam.utilities.torch import serialized_mps_inference
 from pyslam.config_parameters import Parameters
 
 
@@ -356,23 +357,24 @@ class SemanticSegmentationYolo(SemanticSegmentationBase):
         image = self._prepare_image(image)
         img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        results = self.model.predict(
-            source=img_rgb,
-            task="segment",
-            conf=self.confidence_threshold,
-            device=str(self.device),
-            verbose=False,
-        )
-        first = results[0] if isinstance(results, list) and results else results
-        self._last_result = first
-
-        semantics, instances = self._results_to_semantics(first, image.shape[:2])
-        self.semantics = semantics
-
-        if instances is not None and self.enforce_unique_instance_ids:
-            instances = ensure_unique_instance_ids(
-                instances, background_id=0, min_pixels=self.unique_instance_min_pixels
+        with serialized_mps_inference(self.device):
+            results = self.model.predict(
+                source=img_rgb,
+                task="segment",
+                conf=self.confidence_threshold,
+                device=str(self.device),
+                verbose=False,
             )
+            first = results[0] if isinstance(results, list) and results else results
+            self._last_result = first
+
+            semantics, instances = self._results_to_semantics(first, image.shape[:2])
+            self.semantics = semantics
+
+            if instances is not None and self.enforce_unique_instance_ids:
+                instances = ensure_unique_instance_ids(
+                    instances, background_id=0, min_pixels=self.unique_instance_min_pixels
+                )
 
         return SemanticSegmentationOutput(semantics=self.semantics, instances=instances)
 

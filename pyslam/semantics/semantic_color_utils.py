@@ -225,6 +225,8 @@ def need_large_color_map(semantic_segmentation_type: SemanticSegmentationType):
         return True, "EOV-Seg"
     elif semantic_segmentation_type == SemanticSegmentationType.DETIC:
         return True, "Detic"
+    elif semantic_segmentation_type == SemanticSegmentationType.YOLO:
+        return True, "YOLO"
 
     return False, None
 

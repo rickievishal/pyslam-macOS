@@ -84,6 +84,8 @@ class SemanticMappingDenseBase(SemanticMappingBase):
         semantic_feature_type=SemanticFeatureType.LABEL,
         image_size=(512, 512),
         headless=False,
+        model_name=None,
+        reserve_background_label=False,
     ):
         super().__init__(
             slam,
@@ -96,6 +98,8 @@ class SemanticMappingDenseBase(SemanticMappingBase):
         self.semantic_feature_type = semantic_feature_type
         self.semantic_segmentation_type = semantic_segmentation_type
         self.semantic_dataset_type = semantic_dataset_type
+        self.model_name = model_name
+        self.reserve_background_label = reserve_background_label
         self.semantic_fusion_method = SemanticFusionMethods.get_semantic_fusion_method(
             semantic_feature_type
         )
@@ -105,6 +109,8 @@ class SemanticMappingDenseBase(SemanticMappingBase):
             semantic_feature_type=self.semantic_feature_type,
             semantic_dataset_type=semantic_dataset_type,
             image_size=image_size,
+            model_name=model_name,
+            reserve_background_label=reserve_background_label,
         )
 
         Printer.green(f"semantic_segmentation_type: {semantic_segmentation_type.name}")
@@ -115,7 +121,10 @@ class SemanticMappingDenseBase(SemanticMappingBase):
                 semantic_dataset_type, semantic_segmentation_type=semantic_segmentation_type
             )
             self.semantic_sigma2_factor = semantic_information_weights_factory(
-                semantic_dataset_type
+                semantic_dataset_type,
+                num_classes=3000
+                if semantic_segmentation_type == SemanticSegmentationType.YOLO
+                else None,
             )
         else:
             self.semantic_color_map = None
@@ -314,6 +323,8 @@ class SemanticMappingDense(SemanticMappingDenseBase):
         semantic_feature_type=SemanticFeatureType.LABEL,
         image_size=(512, 512),
         headless=False,
+        model_name=None,
+        reserve_background_label=False,
     ):
         super().__init__(
             slam,
@@ -322,6 +333,8 @@ class SemanticMappingDense(SemanticMappingDenseBase):
             semantic_feature_type,
             image_size,
             headless,
+            model_name,
+            reserve_background_label,
         )
 
         # Initialize the semantic segmentation to be used in the thread
@@ -330,6 +343,8 @@ class SemanticMappingDense(SemanticMappingDenseBase):
             semantic_feature_type=self.semantic_feature_type,
             semantic_dataset_type=semantic_dataset_type,
             image_size=image_size,
+            model_name=self.semantic_mapping_config.model_name,
+            reserve_background_label=self.semantic_mapping_config.reserve_background_label,
             encoder_name=(
                 self.semantic_mapping_config.encoder_name
                 if self.semantic_mapping_config.encoder_name

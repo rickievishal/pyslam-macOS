@@ -41,6 +41,8 @@ from .depth_estimator_base import DepthEstimator
 import torch
 from depth_anything_v2.dpt import DepthAnythingV2
 
+from pyslam.utilities.torch import serialized_mps_inference
+
 
 kScriptPath = os.path.realpath(__file__)
 kScriptFolder = os.path.dirname(kScriptPath)
@@ -101,6 +103,7 @@ class DepthEstimatorDepthAnythingV2(DepthEstimator):
 
     # Return the predicted depth map and the point cloud (if any)
     def infer(self, image, image_right=None):
-        depth_prediction = self.model.infer_image(image)
+        with serialized_mps_inference(self.device):
+            depth_prediction = self.model.infer_image(image)
         self.depth_map = depth_prediction
         return depth_prediction, None

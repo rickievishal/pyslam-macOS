@@ -88,6 +88,8 @@ class SemanticMappingDenseProcess(SemanticMappingDenseBase):
         semantic_feature_type=SemanticFeatureType.LABEL,
         image_size=(512, 512),
         headless=False,
+        model_name=None,
+        reserve_background_label=False,
     ):
         super().__init__(
             slam,
@@ -96,6 +98,8 @@ class SemanticMappingDenseProcess(SemanticMappingDenseBase):
             semantic_feature_type,
             image_size,
             headless,
+            model_name,
+            reserve_background_label,
         )
 
         # Initialize the semantic segmentation process

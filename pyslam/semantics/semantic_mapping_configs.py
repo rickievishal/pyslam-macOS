@@ -42,6 +42,8 @@ class SemanticMappingConfig:
         sim_text_query="",
         image_size=(512, 512),
         device=None,
+        model_name=None,
+        reserve_background_label=False,
     ):
         self.semantic_mapping_type = semantic_mapping_type
         self.semantic_segmentation_type = semantic_segmentation_type
@@ -53,6 +55,8 @@ class SemanticMappingConfig:
         self.sim_text_query = sim_text_query
         self.image_size = image_size
         self.device = device
+        self.model_name = model_name
+        self.reserve_background_label = reserve_background_label
 
     def from_dict(self, config_dict: dict):
         self.semantic_mapping_type = config_dict.get("semantic_mapping_type", None)
@@ -65,6 +69,8 @@ class SemanticMappingConfig:
         self.sim_text_query = config_dict.get("sim_text_query", "")
         self.image_size = config_dict.get("image_size", (512, 512))
         self.device = config_dict.get("device", None)
+        self.model_name = config_dict.get("model_name", None)
+        self.reserve_background_label = config_dict.get("reserve_background_label", False)
 
     def to_dict(self) -> dict:
         return {
@@ -78,6 +84,8 @@ class SemanticMappingConfig:
             "sim_text_query": self.sim_text_query,
             "image_size": self.image_size,
             "device": self.device,
+            "model_name": self.model_name,
+            "reserve_background_label": self.reserve_background_label,
         }
 
     def __str__(self) -> str:
@@ -113,15 +121,15 @@ def get_semantic_segmentation_type_from_str(semantic_segmentation_type_str):
 
 class SemanticMappingConfigs:
 
-    # Native macOS webcam profile. DeepLabV3 MobileNet is available directly through
-    # torchvision and avoids the CUDA/detectron2 dependency chain used by DETIC.
+    # Ultralytics YOLOv8n-seg runs on macOS/ MPS and returns per-object masks and IDs.
     MACBOOK_M4_WEBCAM = dict(
         semantic_mapping_type=SemanticMappingType.DENSE,
-        semantic_segmentation_type=SemanticSegmentationType.DEEPLABV3,
-        semantic_dataset_type=SemanticDatasetType.VOC,
+        semantic_segmentation_type=SemanticSegmentationType.YOLO,
+        semantic_dataset_type=SemanticDatasetType.CUSTOM_SET,
         semantic_feature_type=SemanticFeatureType.LABEL,
-        encoder_name="mobilenetv3",
-        image_size=(384, 384),
+        model_name="YOLOv8n-seg",
+        reserve_background_label=True,
+        image_size=(640, 640),
         device=None,
     )
 

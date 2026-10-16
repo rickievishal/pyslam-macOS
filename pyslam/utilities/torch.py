@@ -20,6 +20,25 @@
 import os
 import torch
 import numpy as np
+from contextlib import contextmanager
+from threading import RLock
+
+
+_mps_inference_lock = RLock()
+
+
+@contextmanager
+def serialized_mps_inference(device):
+    """Serialize MPS model runs and wait for Metal work before releasing the lock."""
+    if getattr(device, "type", None) != "mps":
+        yield
+        return
+
+    with _mps_inference_lock:
+        try:
+            yield
+        finally:
+            torch.mps.synchronize()
 
 
 # Convert to numpy

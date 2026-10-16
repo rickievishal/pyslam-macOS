@@ -34,6 +34,7 @@ from pyslam.utilities.serialization import SerializableEnum, register_class
 from pyslam.utilities.depth import img_from_depth
 from pyslam.utilities.logging import Printer
 from pyslam.utilities.system import set_rlimit
+from pyslam.utilities.torch import serialized_mps_inference
 
 from .depth_estimator_base import DepthEstimator
 
@@ -97,7 +98,8 @@ class DepthEstimatorDepthAnythingV3(DepthEstimator):
         images = [image]
 
         # Run inference
-        depth_prediction = self.model.inference(images)
+        with serialized_mps_inference(self.device):
+            depth_prediction = self.model.inference(images)
 
         # Extract depth map from prediction (first image in batch)
         # depth_prediction.depth is [N, H, W] float32 array

@@ -22,6 +22,8 @@ from pyslam.config_parameters import Parameters
 from .semantic_mapping_dense import SemanticMappingDense
 from .semantic_mapping_dense_process import SemanticMappingDenseProcess
 from .semantic_mapping_base import SemanticMappingType
+from .semantic_segmentation_types import SemanticSegmentationType
+from .semantic_types import SemanticDatasetType, SemanticFeatureType
 
 from typing import TYPE_CHECKING
 
@@ -37,6 +39,16 @@ def semantic_mapping_factory(slam: "Slam", headless=False, image_size=(512, 512)
         raise ValueError("semantic_mapping_type is not specified in semantic_mapping_config")
 
     if semantic_mapping_type == SemanticMappingType.DENSE:
+        semantic_segmentation_type = kwargs.get("semantic_segmentation_type")
+        semantic_dataset_type = kwargs.get("semantic_dataset_type")
+        semantic_feature_type = kwargs.get("semantic_feature_type")
+        if not isinstance(semantic_segmentation_type, SemanticSegmentationType):
+            raise ValueError("semantic_segmentation_type is missing or invalid")
+        if not isinstance(semantic_dataset_type, SemanticDatasetType):
+            raise ValueError("semantic_dataset_type is missing or invalid")
+        if not isinstance(semantic_feature_type, SemanticFeatureType):
+            raise ValueError("semantic_feature_type is missing or invalid")
+
         semantic_mapping_dense_class = SemanticMappingDense
         if Parameters.kSemanticMappingMoveSemanticSegmentationToSeparateProcess:
             semantic_mapping_dense_class = SemanticMappingDenseProcess
@@ -44,9 +56,11 @@ def semantic_mapping_factory(slam: "Slam", headless=False, image_size=(512, 512)
             slam=slam,
             headless=headless,
             image_size=image_size,
-            semantic_segmentation_type=kwargs.get("semantic_segmentation_type"),
-            semantic_dataset_type=kwargs.get("semantic_dataset_type"),
-            semantic_feature_type=kwargs.get("semantic_feature_type"),
+            semantic_segmentation_type=semantic_segmentation_type,
+            semantic_dataset_type=semantic_dataset_type,
+            semantic_feature_type=semantic_feature_type,
+            model_name=kwargs.get("model_name"),
+            reserve_background_label=kwargs.get("reserve_background_label", False),
         )
     else:
         raise ValueError(f"Invalid semantic mapping type: {semantic_mapping_type}")

@@ -178,21 +178,27 @@ The `cols` and `rows` are the checkerboard's inner-corner counts; capture at
 least 10 views at varied positions. The webcam launcher requires the Pangolin
 and `glutils` viewer modules described above.
 
-Semantic mapping is opt-in and off by default. Enable it with the launcher
-switch:
+Instance semantic mapping is opt-in and off by default. Install its optional
+YOLO dependency in the project environment once:
+
+```bash
+./.venv/bin/python -m pip install 'ultralytics>=8.3.0'
+```
+
+Then enable it with the launcher switch:
 
 ```bash
 ./run_macbook_webcam_slam.sh --semantics
 ```
 
-The semantic profile uses torchvision DeepLabV3 MobileNetV3 with VOC class
-labels. Per-pixel class predictions are attached to keypoints, fused into map
-points, and included in the semantic voxel map. This is class-label semantic
-segmentation: it does not produce the open-vocabulary object detections or
-distinct instance masks shown in some upstream examples. To disable semantics
+The semantic profile uses the YOLOv8 nano instance-segmentation model pretrained
+on COCO. The first run downloads its weights. It predicts individual masks and
+class IDs, which are fused into the semantic voxel map. In the Map Viewer, enable
+**Color Semantics** for class colors and **Objects** for per-instance colors.
+The model only recognizes its COCO classes; it is not open-vocabulary. Inference
+adds computation and can reduce the live frame rate. To disable semantics
 explicitly, use `--no-semantics`; the equivalent environment toggle remains
-available as `SEMANTIC_ENABLED=true|false`. Semantic inference adds computation
-and can reduce the live frame rate.
+available as `SEMANTIC_ENABLED=true|false`.
 
 ## Troubleshooting
 
@@ -207,6 +213,9 @@ and can reduce the live frame rate.
   messages. If the camera pose is lost, dense integration cannot reliably add
   new geometry. Move the camera smoothly, avoid fast turns and motion blur, and
   retain textured, well-lit scenery in view.
+- **Metal command-encoder assertion with semantics enabled:** depth and
+  semantic inference share a lock on MPS and synchronize before handing the
+  accelerator to the other model. Make sure you have the latest project changes.
 - **Optional-backend import warnings:** warnings for unused extractors,
   segmentation models, depth estimators, or Gaussian-splatting support are not
   necessarily fatal. Install those optional dependencies only if selecting

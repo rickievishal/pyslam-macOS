@@ -85,6 +85,9 @@ dependencies = [
   #"faiss-cpu",
 ]
 
+[project.optional-dependencies]
+semantic-yolo = ["ultralytics>=8.3.0"]
+
 [tool.setuptools]
 packages = ["pyslam", "thirdparty"]
 
