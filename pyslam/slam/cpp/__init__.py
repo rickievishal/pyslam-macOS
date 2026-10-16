@@ -183,7 +183,12 @@ def _import_python_core():
         from pyslam.slam.sim3_pose import Sim3Pose
         from pyslam.io.dataset_types import SensorType
         import pyslam.slam.optimizer_g2o as optimizer_g2o
-        import pyslam.slam.optimizer_gtsam as optimizer_gtsam
+        try:
+            import pyslam.slam.optimizer_gtsam as optimizer_gtsam
+        except ModuleNotFoundError as error:
+            if error.name not in ("gtsam", "gtsam_factors"):
+                raise
+            optimizer_gtsam = None
         from pyslam.slam.tracking_core import TrackingCore
         from pyslam.slam.local_mapping_core import LocalMappingCore
         from pyslam.slam.map import ReloadedSessionMapInfo, LocalCovisibilityMap

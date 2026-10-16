@@ -50,6 +50,8 @@ ThDepth: 40
 #--------------------------------------------------------------------------------------------
 
 FeatureTrackerConfig.nFeatures: 2000
+FeatureTrackerConfig.name: ORB
+LoopDetectorConfig.name: DBOW3
 
 #--------------------------------------------------------------------------------------------
 # Matching (Data Association)

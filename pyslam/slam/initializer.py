@@ -53,7 +53,7 @@ kRansacThresholdNormalized = 0.0004  # metric threshold used for normalized imag
 kRansacProb = 0.999
 
 kMinIdDistBetweenIntializingFrames = 2
-kMaxIdDistBetweenIntializingFrames = 5  # N.B.: worse performances with values smaller than 5!
+kMaxIdDistBetweenIntializingFrames = 30  # allow enough baseline to build parallax for live video
 
 kShowFeatureKps = False  # show the feature kps during initialization
 kShowFeatureMatches = False  # show the feature matches during initialization

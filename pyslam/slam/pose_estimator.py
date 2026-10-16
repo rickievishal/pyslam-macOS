@@ -26,8 +26,14 @@ from pyslam.slam import CameraUtils
 
 from pyslam.utilities.serialization import SerializableEnum
 
-import sim3solver
-import pnpsolver
+try:
+    import sim3solver
+except ImportError:
+    sim3solver = None
+try:
+    import pnpsolver
+except ImportError:
+    pnpsolver = None
 
 
 # Type hints for IDE navigation

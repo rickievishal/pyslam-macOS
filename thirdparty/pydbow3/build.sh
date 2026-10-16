@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd ${SCRIPT_DIR}
@@ -40,9 +41,9 @@ if [ ! -d build ]; then
     mkdir build
 fi
 cd build 
-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${SCRIPT_DIR}/modules/dbow3/install $EXTERNAL_OPTIONS $MAC_OPTIONS
-make -j8
-make install
+cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${SCRIPT_DIR}/modules/dbow3/install -DBUILD_UTILS=OFF $EXTERNAL_OPTIONS $MAC_OPTIONS
+cmake --build . --target DBoW3 --parallel 8
+cmake --install .
 
 cd ${SCRIPT_DIR}
 if [ ! -d build ]; then
@@ -50,4 +51,4 @@ if [ ! -d build ]; then
 fi
 cd build 
 cmake .. -DCMAKE_BUILD_TYPE=Release -DPython3_EXECUTABLE=$PYTHON_EXE $EXTERNAL_OPTIONS $MAC_OPTIONS
-make -j8
+cmake --build . --target pydbow3 --parallel 8

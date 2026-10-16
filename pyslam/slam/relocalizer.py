@@ -44,7 +44,10 @@ from pyslam.config_parameters import Parameters
 import logging
 
 import traceback
-import pnpsolver
+try:
+    import pnpsolver
+except ImportError:
+    pnpsolver = None
 
 
 # Type hints for IDE navigation

@@ -201,7 +201,7 @@ class MapPointBase(object):
                 kf_remove_point_match = True
                 if __debug__:
                     assert self == keyframe.get_point_match(idx)
-                    assert not self in keyframe.points  # checking there are no multiple instances
+                    assert sum(point is self for point in keyframe.points) == 1
             else:
                 kf_remove_point = True
             try:
@@ -271,31 +271,21 @@ class MapPointBase(object):
 
     def remove_frame_view(self, frame: "Frame", idx=None):
         assert not frame.is_keyframe
-        frame_remove_point_match = False
-        frame_remove_point = False
 
-        with self._lock_features:
-            # remove point from frame
-            if idx is not None:
-                if __debug__:
-                    assert self == frame.get_point_match(idx)
-                frame_remove_point_match = True
-                if __debug__:
-                    assert (
-                        not self in frame.get_points()
-                    )  # checking there are no multiple instances
-            else:
-                frame_remove_point = True
-            try:
-                del self._frame_views[frame]
-            except KeyError:
-                pass
-
-        # Make external calls outside of lock context
-        if frame_remove_point_match:
-            frame.remove_point_match(idx)
-        if frame_remove_point:
-            frame.remove_point(self)
+        if idx is not None:
+            # The frame may have already cleared this slot while batching
+            # outlier cleanup. Do not remove a different point's association.
+            if frame.get_point_match(idx) == self:
+                frame.remove_point_match(idx)
+            with self._lock_features:
+                if self._frame_views.get(frame) == idx:
+                    del self._frame_views[frame]
+        else:
+            with self._lock_features:
+                has_frame_view = frame in self._frame_views
+                self._frame_views.pop(frame, None)
+            if has_frame_view:
+                frame.remove_point(self)
 
     def is_bad(self):
         with self._lock_features:

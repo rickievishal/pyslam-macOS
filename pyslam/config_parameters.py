@@ -297,7 +297,7 @@ class Parameters:
     # ================================================================
     # Volumetric Integration
     # ================================================================
-    kDoVolumetricIntegration = False  # To enable/disable volumetric integration (dense mapping)
+    kDoVolumetricIntegration = True  # To enable/disable volumetric integration (dense mapping)
     #
     # kVolumetricIntegrationType: "VOXEL_GRID",
     #                             "VOXEL_SEMANTIC_GRID",  (to be used with semantic mapping activated)
@@ -413,7 +413,7 @@ class Parameters:
     # Depth estimator in the front-end (EXPERIMENTAL, WIP)
     # ================================================================
     kUseDepthEstimatorInFrontEnd = (
-        False  # To enable/disable depth estimation with monocular front-end.
+        True  # To enable/disable depth estimation with monocular front-end.
     )
     #
     # You can directly set your desired depth estimator in main_slam.py.

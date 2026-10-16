@@ -34,20 +34,49 @@ from pyslam.local_features.feature_types import FeatureDescriptorTypes
 from pyslam.slam.feature_tracker_shared import SlamFeatureManagerInfo
 
 from .loop_detector_base import LoopDetectorBase
-from .loop_detector_dbow3 import LoopDetectorDBoW3
-from .loop_detector_dbow2 import LoopDetectorDBoW2
-from .loop_detector_obindex2 import LoopDetectorOBIndex2
-from .loop_detector_ibow import LoopDetectorIBow
-from .loop_detector_vpr import (
-    LoopDetectorHdcDelf,
-    LoopDetectorEigenPlaces,
-    LoopDetectorNetVLAD,
-    LoopDetectorSad,
-    LoopDetectorAlexNet,
-    LoopDetectorCosPlace,
-)
-from .loop_detector_vlad import LoopDetectorVlad
-from .global_feature_megaloc import GlobalFeatureMegaloc
+
+# Loop-closure backends are optional. Keep the configuration module importable
+# when loop closing is disabled and an optional native backend is not installed.
+try:
+    from .loop_detector_dbow3 import LoopDetectorDBoW3
+except (ImportError, AttributeError):
+    LoopDetectorDBoW3 = None
+try:
+    from .loop_detector_dbow2 import LoopDetectorDBoW2
+except (ImportError, AttributeError):
+    LoopDetectorDBoW2 = None
+try:
+    from .loop_detector_obindex2 import LoopDetectorOBIndex2
+except (ImportError, AttributeError):
+    LoopDetectorOBIndex2 = None
+try:
+    from .loop_detector_ibow import LoopDetectorIBow
+except (ImportError, AttributeError):
+    LoopDetectorIBow = None
+try:
+    from .loop_detector_vpr import (
+        LoopDetectorHdcDelf,
+        LoopDetectorEigenPlaces,
+        LoopDetectorNetVLAD,
+        LoopDetectorSad,
+        LoopDetectorAlexNet,
+        LoopDetectorCosPlace,
+    )
+except (ImportError, AttributeError):
+    LoopDetectorHdcDelf = None
+    LoopDetectorEigenPlaces = None
+    LoopDetectorNetVLAD = None
+    LoopDetectorSad = None
+    LoopDetectorAlexNet = None
+    LoopDetectorCosPlace = None
+try:
+    from .loop_detector_vlad import LoopDetectorVlad
+except (ImportError, AttributeError):
+    LoopDetectorVlad = None
+try:
+    from .global_feature_megaloc import GlobalFeatureMegaloc
+except (ImportError, AttributeError):
+    GlobalFeatureMegaloc = None
 from .loop_detector_vocabulary import (
     DBow3OrbVocabularyData,
     DBow2OrbVocabularyData,
@@ -308,6 +337,11 @@ def loop_detector_factory(
             vocabulary_data=vocabulary_data, local_feature_manager=local_feature_manager
         )
     elif global_descriptor_type == GlobalDescriptorType.DBOW3:
+        if LoopDetectorDBoW3 is None:
+            raise ImportError(
+                "DBoW3 loop closing was selected, but the pydbow3 native binding "
+                "is unavailable. Build it with `thirdparty/pydbow3/build.sh`."
+            )
         loop_detector = LoopDetectorDBoW3(
             vocabulary_data=vocabulary_data, local_feature_manager=local_feature_manager
         )

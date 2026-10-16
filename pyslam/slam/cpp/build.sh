@@ -9,7 +9,7 @@ echo "Building PYSLAM C++ Core Module..."
 
 # Get the directory of this script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_DIR=$(readlink -f $SCRIPT_DIR)  # this reads the actual path if a symbolic directory is used
+SCRIPT_DIR="$(cd "$SCRIPT_DIR" && pwd -P)"  # this reads the actual path if a symbolic directory is used
 
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 SCRIPTS_DIR="$PROJECT_ROOT/scripts"
@@ -47,11 +47,20 @@ if [[ -n "$EXTERNAL_OPTIONS" ]]; then
     echo "external option: $EXTERNAL_OPTIONS" 
 fi
 
-OpenCV_DIR="$PROJECT_ROOT/thirdparty/opencv/install/lib/cmake/opencv4"
-echo "OpenCV_DIR: $OpenCV_DIR"
+# Prefer Homebrew OpenCV 4 on Apple Silicon
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    OpenCV_DIR="/opt/homebrew/opt/opencv@4/lib/cmake/opencv4"
+else
+    OpenCV_DIR="$PROJECT_ROOT/thirdparty/opencv/install/lib/cmake/opencv4"
+fi
+
 if [[ -d "$OpenCV_DIR" ]]; then
+    echo "OpenCV_DIR: $OpenCV_DIR"
     EXTERNAL_OPTIONS="$EXTERNAL_OPTIONS -DOpenCV_DIR=$OpenCV_DIR"
-fi 
+else
+    echo "ERROR: OpenCV CMake directory not found: $OpenCV_DIR"
+    exit 1
+fi
 
 export CONDA_OPTIONS=""
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -109,13 +118,15 @@ else
 fi
 
 cmake .. \
+    -DGTSAM_DIR="$PROJECT_ROOT/thirdparty/gtsam_local/install/lib/cmake/GTSAM" \
+    -DCMAKE_PREFIX_PATH="$PROJECT_ROOT/thirdparty/gtsam_local/install" \
     -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
     -Dpybind11_DIR="$PROJECT_ROOT/thirdparty/pybind11/share/cmake/pybind11" \
     -DWITH_MARCH_NATIVE="$WITH_MARCH_NATIVE" $PYTHON_CMAKE_OPTS $PIXI_PYTHON_CMAKE_OPTS $EXTERNAL_OPTIONS
 
 # Build the module
 echo "Building the module..."
-make -j$(nproc)
+make -j4
 
 # The module is already built to the correct location by CMake
 echo "Module built successfully!"

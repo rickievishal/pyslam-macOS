@@ -283,10 +283,10 @@ target_link_libraries(volumetric PRIVATE volumetric_lib)
 #=======================================
 
 add_library(glutils_lib STATIC 
-    glutils/glutils_drawing.cpp)
+    glutils/glutils_drawing.cpp
+    volumetric/bounding_boxes_3d.cpp)
 target_link_libraries(glutils_lib PRIVATE 
     ${OPENGL_LIBRARIES}
-    volumetric_lib
 )
 
 

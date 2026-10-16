@@ -166,8 +166,21 @@ def dataset_factory(config: "Config") -> Dataset:
             DatasetType.FOLDER,
         )
     if type == "live":
+        name = os.environ.get("CAMERA_ID", name)
+        width = int(os.environ.get("WIDTH", dataset_settings.get("width", 0))) or None
+        height = int(os.environ.get("HEIGHT", dataset_settings.get("height", 0))) or None
+        fps = float(os.environ.get("FPS", dataset_settings.get("fps", 0))) or None
         dataset = LiveDataset(
-            path, name, sensor_type, associations, start_frame_id, DatasetType.LIVE
+            path,
+            name,
+            sensor_type,
+            associations,
+            start_frame_id,
+            DatasetType.LIVE,
+            width=width,
+            height=height,
+            fps=fps,
+            environment_type=environment_type,
         )
     if type == "ros1bag":
         from pyslam.io.ros1bag_dataset import Ros1bagDataset

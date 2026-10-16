@@ -58,8 +58,15 @@ def triangulate_normalized_points(pose_1w, pose_2w, kpn_1, kpn_2):
     P2w = pose_2w[:3, :]  # [R2w, t2w]
 
     point_4d_hom = cv2.triangulatePoints(P1w, P2w, kpn_1.T, kpn_2.T)
-    good_pts_mask = np.where(point_4d_hom[3] != 0)[0]
-    point_4d = point_4d_hom / point_4d_hom[3]
+    good_pts_mask = np.isfinite(point_4d_hom).all(axis=0) & (point_4d_hom[3] != 0)
+    point_3d = np.zeros_like(point_4d_hom[:3])
+    np.divide(
+        point_4d_hom[:3],
+        point_4d_hom[3:4],
+        out=point_3d,
+        where=good_pts_mask[None, :],
+    )
+    point_4d = np.vstack((point_3d, good_pts_mask.astype(point_3d.dtype)))
 
     if __debug__:
         if False:
@@ -68,6 +75,5 @@ def triangulate_normalized_points(pose_1w, pose_2w, kpn_1, kpn_2):
             err = np.sum(point_reproj**2)
             print("reproj err: ", err)
 
-    # return point_4d.T
-    points_3d = point_4d[:3, :].T
+    points_3d = point_3d.T
     return points_3d, good_pts_mask

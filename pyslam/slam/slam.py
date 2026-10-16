@@ -66,9 +66,16 @@ from pyslam.utilities.multi_processing import MultiprocessingManager
 from pyslam.utilities.geometry import inv_T
 from pyslam.utilities.waiting import wait_for_ready
 
-from pyslam.dense.volumetric_integrator_base import VolumetricIntegrationOutput
 from pyslam.dense.volumetric_integrator_types import VolumetricIntegratorType
-from pyslam.dense.volumetric_integrator_factory import volumetric_integrator_factory
+try:
+    from pyslam.dense.volumetric_integrator_base import VolumetricIntegrationOutput
+    from pyslam.dense.volumetric_integrator_factory import volumetric_integrator_factory
+except ImportError:
+    # Dense integration is optional for the live monocular profile.
+    class VolumetricIntegrationOutput:
+        pass
+
+    volumetric_integrator_factory = None
 
 from .map_reload_tester import MapReloadTester
 
@@ -260,10 +267,14 @@ class Slam(object):
         ):
             if self.semantic_mapping is not None:
                 self.semantic_mapping.quit()
+            semantic_mapping_config = dict(semantic_mapping_config)
+            image_size = semantic_mapping_config.pop(
+                "image_size", (self.camera.width, self.camera.height)
+            )
             self.semantic_mapping = semantic_mapping_factory(
                 slam=self,
                 headless=headless,
-                image_size=(self.camera.width, self.camera.height),
+                image_size=image_size,
                 **semantic_mapping_config,
             )
             SemanticMappingShared.set_semantic_mapping(self.semantic_mapping, force=True)
@@ -289,6 +300,10 @@ class Slam(object):
 
     def init_volumetric_integrator(self):
         if Parameters.kDoVolumetricIntegration:
+            if volumetric_integrator_factory is None:
+                raise ImportError(
+                    "Volumetric integration is enabled but its optional dependencies are unavailable."
+                )
             self.volumetric_integrator_type = VolumetricIntegratorType.from_string(
                 Parameters.kVolumetricIntegrationType
             )

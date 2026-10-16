@@ -261,27 +261,62 @@ class LiveDataset(Dataset):
         associations=None,
         start_frame_id=0,
         type=DatasetType.VIDEO,
+        width=None,
+        height=None,
+        fps=None,
+        environment_type=DatasetEnvironmentType.OUTDOOR,
     ):
-        super().__init__(path, name, sensor_type, None, associations, start_frame_id, type)
+        super().__init__(
+            path,
+            name,
+            sensor_type,
+            None,
+            associations,
+            start_frame_id,
+            type,
+            environment_type,
+        )
         if sensor_type != SensorType.MONOCULAR:
             raise ValueError("Video dataset only supports MONOCULAR sensor type")
-        self.camera_num = name  # use name for camera number
+        self.camera_num = int(name)  # use name for the camera index
         print("opening camera device: ", self.camera_num)
         self.cap = cv2.VideoCapture(self.camera_num)
         if not self.cap.isOpened():
-            raise IOError("Cannot open camera")
-        else:
-            self.fps = float(self.cap.get(cv2.CAP_PROP_FPS))
-            self.Ts = 1.0 / self.fps
-            print("fps: ", self.fps)
+            raise IOError(
+                f"Cannot open camera {self.camera_num}. Grant camera access to the terminal/Codex "
+                "in System Settings > Privacy & Security > Camera, then retry."
+            )
+
+        if width is not None:
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, int(width))
+        if height is not None:
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, int(height))
+        if fps is not None:
+            self.cap.set(cv2.CAP_PROP_FPS, float(fps))
+
+        self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        self.fps = float(self.cap.get(cv2.CAP_PROP_FPS))
+        if self.fps <= 0:
+            self.fps = float(fps) if fps else 30.0
+        self.Ts = 1.0 / self.fps
+        self.num_frames = None  # Live input has no known terminal frame count.
+        self.i = int(start_frame_id)
+        print(f"Live camera: {self.width}x{self.height} at {self.fps:.1f} FPS")
 
     def getImage(self, frame_id):
         ret, image = self.cap.read()
-        self._timestamp = time.time()  # rough timestamp if nothing else is available
+        if not ret or image is None:
+            raise RuntimeError(f"Failed to read frame from camera {self.camera_num}")
+        self._timestamp = time.time()
         self._next_timestamp = self._timestamp + self.Ts
-        if ret is False:
-            print("ERROR in reading from camera: ", self.camera_num)
+        self.i += 1
         return np.ascontiguousarray(image)
+
+    def quit(self):
+        if self.cap is not None:
+            self.cap.release()
+            self.cap = None
 
 
 def timestamp_from_image_filename(image_file):

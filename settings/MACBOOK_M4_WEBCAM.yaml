@@ -1,0 +1,37 @@
+# MacBook built-in webcam profile. Intrinsics are deliberately approximate until
+# calibrate_macbook_webcam.py writes measured values into this file.
+Viewer.on: 1
+Viewer.KeyFrameSize: 0.05
+Viewer.KeyFrameLineWidth: 1
+Viewer.GraphLineWidth: 0.9
+Viewer.PointSize: 2
+Viewer.LineSize: 1
+Viewer.CameraSize: 0.08
+Viewer.CameraLineWidth: 3
+Viewer.ViewpointX: 0
+Viewer.ViewpointY: -0.7
+Viewer.ViewpointZ: -1.8
+Viewer.ViewpointF: 500
+
+Camera.fx: 576.0
+Camera.fy: 576.0
+Camera.cx: 320.0
+Camera.cy: 240.0
+Camera.k1: 0.0
+Camera.k2: 0.0
+Camera.p1: 0.0
+Camera.p2: 0.0
+Camera.k3: 0.0
+Camera.width: 640
+Camera.height: 480
+Camera.fps: 30.0
+Camera.bf: 0.0
+Camera.RGB: 0
+ThDepth: 40.0
+DepthMapFactor: 1.0
+
+# Use OpenCV ORB on macOS when the optional orbslam2_features extension is absent.
+FeatureTrackerConfig.name: ORB
+FeatureTrackerConfig.nFeatures: 1200
+LoopDetectorConfig.name: null
+SemanticMappingConfig.name: MACBOOK_M4_WEBCAM

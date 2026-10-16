@@ -7,7 +7,7 @@
 // OpenCV
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/features2d.hpp>
 #ifdef USE_CONTRIB
 #include <opencv2/xfeatures2d/nonfree.hpp>
 #include <opencv2/xfeatures2d.hpp>
@@ -86,4 +86,3 @@ int main(int argc,char **argv)
 
     return 0;
 }
-

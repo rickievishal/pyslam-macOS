@@ -345,7 +345,9 @@ class Config:
     @property
     def loop_detection_config_name(self):
         if not hasattr(self, "_loop_detection_config_name"):
-            if "LoopDetectionConfig.name" in self.system_settings:
+            if "LoopDetectorConfig.name" in self.system_settings:
+                self._loop_detection_config_name = self.system_settings["LoopDetectorConfig.name"]
+            elif "LoopDetectionConfig.name" in self.system_settings:
                 self._loop_detection_config_name = self.system_settings["LoopDetectionConfig.name"]
             else:
                 self._loop_detection_config_name = None

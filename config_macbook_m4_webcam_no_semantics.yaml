@@ -1,0 +1,30 @@
+DATASET:
+  type: LIVE_DATASET
+
+LIVE_DATASET:
+  type: live
+  sensor_type: mono
+  base_path: ""
+  name: 0
+  width: 640
+  height: 480
+  fps: 30
+  settings: settings/MACBOOK_M4_WEBCAM.yaml
+  groundtruth_file: auto
+  environment_type: indoor
+
+SYSTEM_STATE:
+  load_state: False
+  folder_path: results/m4_webcam_state
+
+SAVE_TRAJECTORY:
+  save_trajectory: True
+  format_type: tum
+  output_folder: results/m4_webcam_metrics
+  basename: trajectory
+
+GLOBAL_PARAMETERS:
+  kDoVolumetricIntegration: True
+  kUseDepthEstimatorInFrontEnd: True
+  kDoSparseSemanticMappingAndSegmentation: False
+  kUseLoopClosing: False

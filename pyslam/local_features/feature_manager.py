@@ -236,7 +236,7 @@ class FeatureManager:
             LUCID_create = import_from("cv2", "xfeatures2d_LUCID", "create")
             VGG_create = import_from("cv2", "xfeatures2d_VGG", "create")
             BEBLID_create = import_from("cv2", "xfeatures2d", "BEBLID_create")
-        elif opencv_major == 4 and opencv_minor >= 5:
+        elif opencv_major > 4 or (opencv_major == 4 and opencv_minor >= 5):
             SIFT_create = import_from("cv2", "SIFT_create")
             SURF_create = import_from("cv2.xfeatures2d", "SURF_create")
             FREAK_create = import_from("cv2.xfeatures2d", "FREAK_create")

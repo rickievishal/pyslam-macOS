@@ -523,7 +523,17 @@ class Viewer3D(object):
         print("Viewer3D: done")
 
     def wait_for_ready(self, timeout=None):
-        wait_for_ready(self.is_ready, "Viewer3D", timeout)
+        def is_ready_or_failed():
+            if self.is_ready():
+                return True
+            if not self.vp.is_alive():
+                raise RuntimeError(
+                    f"Viewer3D process exited before becoming ready "
+                    f"(exit code: {self.vp.exitcode})"
+                )
+            return False
+
+        wait_for_ready(is_ready_or_failed, "Viewer3D", timeout)
         Printer.green("Viewer3D: ready")
 
     def is_ready(self):

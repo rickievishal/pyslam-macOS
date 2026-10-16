@@ -6,7 +6,7 @@
 #set -e
 
 SCRIPT_DIR_=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd ) # get script dir
-SCRIPT_DIR_=$(readlink -f $SCRIPT_DIR_)  # this reads the actual path if a symbolic directory is used
+SCRIPT_DIR_=$(cd "$SCRIPT_DIR_" && pwd -P)  # this reads the actual path if a symbolic directory is used
 
 ROOT_DIR="$SCRIPT_DIR_/.."
 SCRIPTS_DIR="$ROOT_DIR/scripts"
@@ -150,7 +150,7 @@ if [[ ! -f "$TARGET_GTSAM_LIB" ]]; then
     fi 
     echo GTSAM_OPTIONS: $GTSAM_OPTIONS
     cmake .. -DCMAKE_INSTALL_PREFIX="`pwd`/../install" -DCMAKE_BUILD_TYPE=Release $GTSAM_OPTIONS $EXTERNAL_OPTIONS $MAC_OPTIONS
-	make -j $(nproc)
+	make -j "$(sysctl -n hw.ncpu)"
     make install 
 
     # Now install gtsam python package

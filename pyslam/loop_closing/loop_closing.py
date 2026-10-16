@@ -67,8 +67,14 @@ import traceback
 import platform
 import pickle
 
-import sim3solver
-import pnpsolver
+try:
+    import sim3solver
+except ImportError:
+    sim3solver = None
+try:
+    import pnpsolver
+except ImportError:
+    pnpsolver = None
 
 from typing import TYPE_CHECKING
 

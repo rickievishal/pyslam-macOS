@@ -113,6 +113,18 @@ def get_semantic_segmentation_type_from_str(semantic_segmentation_type_str):
 
 class SemanticMappingConfigs:
 
+    # Native macOS webcam profile. DeepLabV3 MobileNet is available directly through
+    # torchvision and avoids the CUDA/detectron2 dependency chain used by DETIC.
+    MACBOOK_M4_WEBCAM = dict(
+        semantic_mapping_type=SemanticMappingType.DENSE,
+        semantic_segmentation_type=SemanticSegmentationType.DEEPLABV3,
+        semantic_dataset_type=SemanticDatasetType.VOC,
+        semantic_feature_type=SemanticFeatureType.LABEL,
+        encoder_name="mobilenetv3",
+        image_size=(384, 384),
+        device=None,
+    )
+
     @staticmethod
     def get_config_from_name(config_name):
         config_dict = getattr(SemanticMappingConfigs, config_name, None)

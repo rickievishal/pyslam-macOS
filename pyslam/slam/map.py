@@ -42,7 +42,13 @@ import traceback
 
 import g2o
 from . import optimizer_g2o
-from . import optimizer_gtsam
+try:
+    from . import optimizer_gtsam
+except ModuleNotFoundError as error:
+    # GTSAM is optional; the default macOS profile uses g2o.
+    if error.name not in ("gtsam", "gtsam_factors"):
+        raise
+    optimizer_gtsam = None
 
 import pyslam_utils
 
@@ -483,6 +489,13 @@ class Map(object):
         out_mask_pts3d = np.full(points3d.shape[0], False, dtype=bool)
         if mask_pts3d is None:
             mask_pts3d = np.full(points3d.shape[0], True, dtype=bool)
+        else:
+            mask_pts3d = np.asarray(mask_pts3d, dtype=bool).reshape(-1)
+            if mask_pts3d.shape[0] != points3d.shape[0]:
+                raise ValueError(
+                    "mask_pts3d must have one validity value per 3D point "
+                    f"({mask_pts3d.shape[0]} mask values for {points3d.shape[0]} points)"
+                )
 
         if do_check:
 

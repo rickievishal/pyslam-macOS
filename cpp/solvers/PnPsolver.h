@@ -73,7 +73,7 @@
 #include <Eigen/Dense>
 
 #include <opencv2/core/core.hpp>
-#include <opencv2/core/types_c.h>
+#include <opencv2/core/types.hpp>
 
 namespace utils {
 

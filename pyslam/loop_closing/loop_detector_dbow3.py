@@ -17,6 +17,8 @@
 * along with PYSLAM. If not, see <http://www.gnu.org/licenses/>.
 """
 
+from __future__ import annotations
+
 import os
 import time
 import math
@@ -41,6 +43,15 @@ import pyslam.config as config
 
 config.cfg.set_lib("pydbow3")
 import pydbow3 as dbow3
+
+_required_dbow3_api = ("Vocabulary", "Database", "BowVector")
+_missing_dbow3_api = [name for name in _required_dbow3_api if not hasattr(dbow3, name)]
+if _missing_dbow3_api:
+    raise ImportError(
+        "The loaded pydbow3 module is missing "
+        f"{', '.join(_missing_dbow3_api)}. Build the repository's native binding with "
+        "`thirdparty/pydbow3/build.sh` using the active Python environment."
+    )
 
 
 kVerbose = True

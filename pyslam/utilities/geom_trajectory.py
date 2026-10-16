@@ -26,8 +26,14 @@ from .logging import Printer
 from .multi_processing import MultiprocessingManager
 from .data_management import empty_queue, get_last_item_from_queue
 
-import sim3solver
-import trajectory_tools
+try:
+    import sim3solver
+except ImportError:
+    sim3solver = None
+try:
+    import trajectory_tools
+except ImportError:
+    trajectory_tools = None
 
 from numba import njit
 

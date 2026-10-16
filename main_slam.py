@@ -33,7 +33,6 @@ import platform
 from pyslam.config import Config  # , dump_config_to_json
 
 from pyslam.semantics.semantic_mapping_configs import SemanticMappingConfigs
-from pyslam.semantics.semantic_eval import evaluate_semantic_mapping
 
 from pyslam.slam.slam import Slam, SlamState
 from pyslam.slam import PinholeCamera, USE_CPP
@@ -48,7 +47,12 @@ from pyslam.viz.viewer3D import Viewer3D
 from pyslam.utilities.logging import Printer, LoggerQueue
 from pyslam.utilities.system import force_kill_all_and_exit
 from pyslam.utilities.img_management import ImgWriter
-from pyslam.utilities.evaluation import eval_ate
+try:
+    from pyslam.utilities.evaluation import eval_ate
+except PermissionError:
+    # EVO creates a user asset directory at import time; live webcam runs do
+    # not need evaluation unless ground-truth data is configured.
+    eval_ate = None
 from pyslam.utilities.geom_trajectory import find_poses_associations
 from pyslam.utilities.colors import GlColors
 from pyslam.utilities.serialization import SerializableEnumEncoder
@@ -204,6 +208,8 @@ if __name__ == "__main__":
         loop_detection_config = LoopDetectorConfigs.get_config_from_name(
             config.loop_detection_config_name
         )  # Override the loop detector configuration from the `settings` file
+    elif "LoopDetectorConfig.name" in config.system_settings:
+        loop_detection_config = None  # An explicit null disables loop closing for this dataset.
     if (
         config.semantic_mapping_config_name is not None
     ):  # Check if we set `SemanticMappingConfig.name` in the `settings` file. It is recommended to load semantics from the slam dataset name instead
@@ -234,7 +240,7 @@ if __name__ == "__main__":
         Parameters.kVolumetricIntegrationUseDepthEstimator = False  # Just use this depth estimator in the front-end (This is not a choice, we are imposing it for avoiding computing the depth twice)
         # Select your depth estimator (see the file depth_estimator_factory.py)
         # DEPTH_ANYTHING_V2, DEPTH_ANYTHING_V3, DEPTH_PRO, DEPTH_RAFT_STEREO, DEPTH_SGBM, etc.
-        depth_estimator_type = DepthEstimatorType.DEPTH_PRO
+        depth_estimator_type = DepthEstimatorType.DEPTH_ANYTHING_V2
         max_depth = 20
         depth_estimator = depth_estimator_factory(
             depth_estimator_type=depth_estimator_type,
@@ -532,7 +538,12 @@ if __name__ == "__main__":
             f.write(f"num_lost_frames: {num_tracking_lost}\n")
             f.write(f"percent_lost: {num_tracking_lost/num_total_frames*100:.2f}\n")
 
-        evaluate_semantic_mapping(slam, dataset, metrics_save_dir)
+        # Semantic evaluation is an end-of-run report and imports Matplotlib;
+        # keep it out of the live-stream startup path.
+        if Parameters.kDoSparseSemanticMappingAndSegmentation:
+            from pyslam.semantics.semantic_eval import evaluate_semantic_mapping
+
+            evaluate_semantic_mapping(slam, dataset, metrics_save_dir)
 
     except Exception as e:
         print("Exception while computing metrics: ", e)
