@@ -453,12 +453,17 @@ if __name__ == "__main__":
                 Printer.blue("\nuncheck pause checkbox on GUI to continue...\n")
 
             if viewer3D:
-
                 if not is_paused and viewer3D.is_paused():  # when a pause is triggered
                     est_poses, timestamps, ids = slam.get_final_trajectory()
-                    if has_groundtruth:
-                        assoc_timestamps, assoc_est_poses, assoc_gt_poses = find_poses_associations(
-                            timestamps, est_poses, gt_timestamps, gt_poses
+                    if not est_poses:
+                        Printer.yellow(
+                            "SLAM has not initialized; skipping trajectory evaluation."
+                        )
+                    elif has_groundtruth:
+                        assoc_timestamps, assoc_est_poses, assoc_gt_poses = (
+                            find_poses_associations(
+                                timestamps, est_poses, gt_timestamps, gt_poses
+                            )
                         )
                         ape_stats, T_gt_est = eval_ate(
                             poses_est=assoc_est_poses,
@@ -510,7 +515,11 @@ if __name__ == "__main__":
     try:
         est_poses, timestamps, ids = slam.get_final_trajectory()
         is_final = not dataset.is_ok
-        if has_groundtruth:
+        if not est_poses:
+            Printer.yellow(
+                "SLAM did not initialize; skipping trajectory evaluation."
+            )
+        elif has_groundtruth:
             assoc_timestamps, assoc_est_poses, assoc_gt_poses = find_poses_associations(
                 timestamps, est_poses, gt_timestamps, gt_poses
             )
@@ -532,11 +541,22 @@ if __name__ == "__main__":
             final_trajectory_writer.close_file()
 
         other_metrics_file_path = os.path.join(metrics_save_dir, "other_metrics_info.txt")
+        total_frames_for_metrics = (
+            num_total_frames if num_total_frames is not None else num_frames
+        )
+        percent_lost = (
+            num_tracking_lost / total_frames_for_metrics * 100
+            if total_frames_for_metrics > 0
+            else 0.0
+        )
         with open(other_metrics_file_path, "w") as f:
-            f.write(f"num_total_frames: {num_total_frames}\n")
+            total_frames_label = (
+                num_total_frames if num_total_frames is not None else "unknown (live input)"
+            )
+            f.write(f"num_total_frames: {total_frames_label}\n")
             f.write(f"num_processed_frames: {num_frames}\n")
             f.write(f"num_lost_frames: {num_tracking_lost}\n")
-            f.write(f"percent_lost: {num_tracking_lost/num_total_frames*100:.2f}\n")
+            f.write(f"percent_lost: {percent_lost:.2f}\n")
 
         # Semantic evaluation is an end-of-run report and imports Matplotlib;
         # keep it out of the live-stream startup path.

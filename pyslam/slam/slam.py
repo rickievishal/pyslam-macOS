@@ -606,10 +606,11 @@ class Slam(object):
         timestamps = []
         ids = []
 
-        # keyframes = self.map.get_keyframes()
-        # keyframes.sort(key=lambda kf: kf.id)
-        # print(f'keyframes: {[kf.id for kf in keyframes]}')
-        first_keyframe = self.map.get_first_keyframe()
+        keyframes = self.map.get_keyframes()
+        if not keyframes:
+            Printer.yellow("SLAM has no keyframes; returning an empty trajectory.")
+            return poses, timestamps, ids
+        first_keyframe = keyframes[0]
 
         # Transform all keyframes so that the first keyframe is at the origin.
         # After a loop closure the first keyframe might not be at the origin.

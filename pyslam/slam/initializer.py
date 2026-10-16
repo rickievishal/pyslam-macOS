@@ -85,7 +85,7 @@ class Initializer(object):
 
         self.num_min_features = (
             Parameters.kInitializerNumMinFeatures
-            if self.is_monocular
+            if self.sensor_type in (SensorType.MONOCULAR, SensorType.RGBD)
             else Parameters.kInitializerNumMinFeaturesStereo
         )
         self.num_min_triangulated_points = (
